@@ -12,8 +12,7 @@ package model
 		public var userId:String = "User #1";
 		public var maxQSize:int = 10000;
 		public var maxEventsPerRequest:int = 50;
-		public var eventName:String = "AS Event";
-		
+				
 		public function TesterConfiguration()
 		{
 		}
@@ -49,11 +48,7 @@ package model
 			if (_sharedObj.data.hasOwnProperty("maxEventsPerRequest")) {
 				maxEventsPerRequest = _sharedObj.data.maxEventsPerRequest;
 			}
-			
-			if (_sharedObj.data.hasOwnProperty("eventName")) {
-				eventName = _sharedObj.data.eventName;
-			}
-			
+				
 		}
 		
 		public function saveConfiguration():void {
@@ -71,7 +66,6 @@ package model
 			_sharedObj.data.userId = userId;
 			_sharedObj.data.maxQSize = maxQSize;
 			_sharedObj.data.maxEventsPerRequest = maxEventsPerRequest;
-			_sharedObj.data.eventName = eventName;
 			
 			//saving the values
 			_sharedObj.flush();
