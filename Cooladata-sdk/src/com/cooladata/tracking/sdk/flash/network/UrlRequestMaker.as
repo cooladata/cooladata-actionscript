@@ -18,7 +18,7 @@ package com.cooladata.tracking.sdk.flash.network
 			request.url = ConfigManager.getInstance().getServiceEndPoint() + "/v1/" + ConfigManager.getInstance().getApiToken() + "/track?r=" + Math.random();
 			
 			var dataNotEnc:String = '{"events":[' + Json + ']}';
-			var dataEnc:String = "data=" + encodeURI(dataNotEnc);
+			var dataEnc:String = "data=" + encodeURIComponent(dataNotEnc);
 		
 			request.data = dataEnc;
 			request.requestHeaders = [new URLRequestHeader("Content-Type", "application/x-www-form-urlencoded")];

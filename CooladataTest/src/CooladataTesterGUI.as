@@ -29,12 +29,14 @@ package
 		private var userIdTextInput:TextInput;
 		private var maxQSizeTextInput:TextInput;
 		private var maxEventsPerRequestTextInput:TextInput;
-		private var eventNameTextInput:TextInput;
 		private var setupButton:Button;
 		private var logsTextArea:TextArea;
 		private var setUpContainer:LayoutGroup;
-		private var sendEventContainer:LayoutGroup;
-		private var eventParametersContainer:ScrollContainer;
+		private var sendEventsContainer:ScrollContainer;
+		private var addEventButton:Button;
+		private var horizontalLayout:HorizontalLayout;
+		private var verticalLayout:VerticalLayout;
+		private var sendEventsButton:Button;
 		
 		public function CooladataTesterGUI()
 		{
@@ -68,14 +70,14 @@ package
 			topMostContainer.layout = topMostHorizontalLayout;
 			this.addChild(topMostContainer);
 			
-			var verticalLayout:VerticalLayout = new VerticalLayout();
+			verticalLayout = new VerticalLayout();
 			verticalLayout.gap = 10;
 
 			var generalContainer:LayoutGroup = new LayoutGroup();
 			generalContainer.layout = verticalLayout;
 			topMostContainer.addChild(generalContainer);
 			
-			var horizontalLayout:HorizontalLayout = new HorizontalLayout();
+			horizontalLayout = new HorizontalLayout();
 			horizontalLayout.gap = 10;
 			horizontalLayout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_MIDDLE;
 			
@@ -84,6 +86,7 @@ package
 			*/
 			
 			var headerLabel:Label = new Label();
+			headerLabel.paddingTop = 50;
 			headerLabel.text = "Cooladata Flash Tester";
 			headerLabel.styleNameList.add( "header-label" );
 			generalContainer.addChild(headerLabel);
@@ -218,51 +221,34 @@ package
 			setUpContainer.addChild( setupButton );
 			
 			/*
-			*	event name
+			*	events
 			*/
 			
-			var sendEventContainerVerticalLayout:VerticalLayout = new VerticalLayout();
-			sendEventContainerVerticalLayout.verticalAlign = VerticalLayout.VERTICAL_ALIGN_TOP;
-			sendEventContainerVerticalLayout.gap = 10;
+				
+			var sendEventsContainerVerticalLayout:VerticalLayout = new VerticalLayout();
+			sendEventsContainerVerticalLayout.verticalAlign = VerticalLayout.VERTICAL_ALIGN_TOP;
+			sendEventsContainerVerticalLayout.gap = 10;
 			
-			sendEventContainer = new LayoutGroup();
-			sendEventContainer.layout = sendEventContainerVerticalLayout;
-			sendEventContainer.isEnabled = false;
-			sendEventContainer.alpha = 0.5;
+			sendEventsContainer = new ScrollContainer();
+			sendEventsContainer.height = 300;
+			sendEventsContainer.layout = sendEventsContainerVerticalLayout;
+			sendEventsContainer.isEnabled = false;
+			sendEventsContainer.alpha = 0.5;
 			
-			generalContainer.addChild(sendEventContainer);
+			generalContainer.addChild(sendEventsContainer);
 			
-			var eventNameContainer:LayoutGroup = new LayoutGroup();
-			horizontalLayout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_TOP;
-			eventNameContainer.layout = horizontalLayout;
+			addEventButton = new Button();
+			addEventButton.label = "Add Event";
+			addEventButton.addEventListener(Event.TRIGGERED, onAddEvent);
+			generalContainer.addChild(addEventButton); 
 			
-			sendEventContainer.addChild(eventNameContainer);
+			sendEventsButton = new Button();
+			sendEventsButton.addEventListener(Event.TRIGGERED, onSendEvents);
+			generalContainer.addChild( sendEventsButton );
 			
-			var eventNameLabel:Label = new Label();
-			eventNameLabel.width = 150;
-			eventNameLabel.text = "Event name: ";
-			eventNameContainer.addChild(eventNameLabel);
-			
-			eventNameTextInput = new TextInput();
-			eventNameTextInput.width = 250;
-			eventNameTextInput.text = testerConfiguration.eventName;
-			eventNameContainer.addChild( eventNameTextInput );
-			
-			var addEventParamButton:Button = new Button();
-			addEventParamButton.label = "Add Parameter";
-			addEventParamButton.addEventListener(Event.TRIGGERED, onAddEventParameter);
-			eventNameContainer.addChild(addEventParamButton);
-			
-			eventParametersContainer = new ScrollContainer();
-			eventParametersContainer.height = 150;
-			eventParametersContainer.layout = verticalLayout;
-			eventNameContainer.addChild(eventParametersContainer);
-			
-			var sendEventButton:Button = new Button();
-			sendEventButton.label = "Send Event";
-			sendEventButton.addEventListener(Event.TRIGGERED, onSendEvent);
-			sendEventContainer.addChild( sendEventButton );
-			
+			// Add the first event
+			onAddEvent(null);
+				
 			/*
 			*	Logs
 			*/
@@ -283,7 +269,143 @@ package
 			generalContainer.addChild( clearLogsButton );
 		}
 		
+		/**
+		 * Add event to the events list
+		 */
+		private function onAddEvent(event:Event):void {
+			var eventNameContainer:LayoutGroup = new LayoutGroup();
+			horizontalLayout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_TOP;
+			eventNameContainer.layout = horizontalLayout;
+			
+			sendEventsContainer.addChild(eventNameContainer);
+			
+			onAddEventToContainer(eventNameContainer, "AS event");
+		}
+			
+		private function onAddEventToContainer(eventNameContainer:LayoutGroup, eventName:String):ScrollContainer {
+			
+			var deleteEventButton:Button = new Button();
+			deleteEventButton.label = "x";
+			deleteEventButton.width = 50;
+			deleteEventButton.addEventListener(Event.TRIGGERED, onDeleteEvent);
+			eventNameContainer.addChild(deleteEventButton);
+			
+			var duplicateEventButton:Button = new Button();
+			duplicateEventButton.label = "Dup";
+			duplicateEventButton.width = 50;
+			duplicateEventButton.addEventListener(Event.TRIGGERED, onDuplicateEvent);
+			eventNameContainer.addChild(duplicateEventButton);
+			
+			var eventNameLabel:Label = new Label();
+			eventNameLabel.width = 150;
+			eventNameLabel.text = "Event name: ";
+			eventNameContainer.addChild(eventNameLabel);
+			
+			var eventNameTextInput:TextInput = new TextInput();
+			eventNameTextInput.width = 250;
+			eventNameTextInput.text = eventName;
+			eventNameContainer.addChild( eventNameTextInput );
+			
+			var addEventParamButton:Button = new Button();
+			addEventParamButton.label = "Add Property";
+			addEventParamButton.addEventListener(Event.TRIGGERED, onAddEventParameter);
+			eventNameContainer.addChild(addEventParamButton);
+			
+			var eventParametersContainer:ScrollContainer = new ScrollContainer();
+			eventParametersContainer.height = 150;
+			eventParametersContainer.layout = verticalLayout;
+			eventNameContainer.addChild(eventParametersContainer);
+			
+			updateSendEventsButtonLabel();
+			
+			return eventParametersContainer;
+		}
+		
+		/**
+		 * Delete event from the events list
+		 */
+		private function onDeleteEvent(event:Event):void {
+			var deleteEventButton:Button = event.target as Button;
+			
+			// Get the parent group
+			var paramsContainer:LayoutGroup = deleteEventButton.parent as LayoutGroup;
+			
+			// Remove from the parent parent group
+			paramsContainer.parent.removeChild(paramsContainer);
+			
+			updateSendEventsButtonLabel();
+		}
+		
+		/**
+		 * Create another event with the same parameters
+		 */
+		private function onDuplicateEvent(event:Event):void {
+			
+			var originalEventContainer:LayoutGroup = (event.target as Button).parent as LayoutGroup;
+			var originalEventNameTextInput:TextInput = originalEventContainer.getChildAt(3) as TextInput;
+			var originalEventParametersContainer:ScrollContainer = originalEventContainer.getChildAt(5) as ScrollContainer;
+			
+			var eventNameContainer:LayoutGroup = new LayoutGroup();
+			horizontalLayout.verticalAlign = HorizontalLayout.VERTICAL_ALIGN_TOP;
+			eventNameContainer.layout = horizontalLayout;
+			
+			sendEventsContainer.addChild(eventNameContainer);
+			
+			var eventParametersContainer:ScrollContainer = onAddEventToContainer(eventNameContainer, originalEventNameTextInput.text);
+			
+			// Copy the parametrs
+			if (originalEventParametersContainer.numChildren > 0) {
+				// There are event parameters to send
+				
+				for (var childrenIndex:int = 0; childrenIndex < originalEventParametersContainer.numChildren; childrenIndex++) {
+					var originalParamsContainer:LayoutGroup = originalEventParametersContainer.getChildAt(childrenIndex) as LayoutGroup;
+					
+					// get the param name 
+					var paramNameTextInput:TextInput = originalParamsContainer.getChildAt(0) as TextInput;
+					
+					// ge the param value
+					var paramValueTextInput:TextInput = originalParamsContainer.getChildAt(1) as TextInput;
+					
+					addEventPropertyToContainer(eventParametersContainer, paramNameTextInput.text, paramValueTextInput.text);
+				}
+			}
+			
+			updateSendEventsButtonLabel();
+		}
+		
+		/**
+		 * Update the 'sendEvents' button label
+		 */
+		private function updateSendEventsButtonLabel():void {
+			if (sendEventsContainer.numChildren == 0) {
+				sendEventsButton.label = "------";	
+			}
+			else if (sendEventsContainer.numChildren == 1) {
+				sendEventsButton.label = "Send 1 Event";
+			}
+			else {
+				sendEventsButton.label = "Send " + sendEventsContainer.numChildren + " Events";
+			}	
+			
+			sendEventsButton.isEnabled = (sendEventsContainer.numChildren > 0);
+		}
+		
+		/**
+		 * Add property to specific event
+		 */
 		private function onAddEventParameter(event:Event):void {
+			
+			var addEventParameterButton:Button = event.target as Button;
+			
+			// Get the parent group
+			var container:LayoutGroup = addEventParameterButton.parent as LayoutGroup;
+			
+			var eventParametersContainer:ScrollContainer = container.getChildAt(container.numChildren - 1) as ScrollContainer;
+			
+			addEventPropertyToContainer(eventParametersContainer, "", "");
+		}
+		
+		private function addEventPropertyToContainer(eventParametersContainer:ScrollContainer, propertyName:String, propertyValue:String):void {
 			
 			var paramsHorizontalLayout:HorizontalLayout = new HorizontalLayout();
 			paramsHorizontalLayout.gap = 10;
@@ -293,11 +415,13 @@ package
 				
 			var paramNameTextInput:TextInput = new TextInput();
 			paramNameTextInput.width = 100;
+			paramNameTextInput.text = propertyName;
 			paramNameTextInput.prompt = "Name";
 			paramsContainer.addChild( paramNameTextInput );
 			
 			var paramValueTextInput:TextInput = new TextInput();
 			paramValueTextInput.width = 100;
+			paramValueTextInput.text = propertyValue;
 			paramValueTextInput.prompt = "Value";
 			paramsContainer.addChild( paramValueTextInput );
 			
@@ -309,6 +433,9 @@ package
 			eventParametersContainer.addChild(paramsContainer);
 		}
 		
+		/**
+		 * Delete a single property from a specific event
+		 */
 		private function onDeleteParam(event:Event):void {
 			var deleteParamButton:Button = event.target as Button;
 			
@@ -319,6 +446,9 @@ package
 			paramsContainer.parent.removeChild(paramsContainer);
 		}
 		
+		/**
+		 * User clicked the 'setup'
+		 */
 		private function onSetupClicked(event:Event):void {
 			// Update all fields
 			testerConfiguration.hostAddress = hostAddressTextInput.text;
@@ -327,7 +457,6 @@ package
 			testerConfiguration.userId = userIdTextInput.text;
 			testerConfiguration.maxQSize = parseInt(maxQSizeTextInput.text);
 			testerConfiguration.maxEventsPerRequest = parseInt(maxEventsPerRequestTextInput.text);
-			testerConfiguration.eventName = eventNameTextInput.text;
 			
 			CoolaDataTracker.getInstance().getConfigManager().setQueueMaxSize(parseInt(maxQSizeTextInput.text));
 			CoolaDataTracker.getInstance().getConfigManager().setMaxEventsPerRequest(parseInt(maxEventsPerRequestTextInput.text));
@@ -339,10 +468,13 @@ package
 			setUpContainer.isEnabled = false;
 			setUpContainer.alpha = 0.5;
 			
-			sendEventContainer.isEnabled = true;
-			sendEventContainer.alpha = 1;
+			sendEventsContainer.isEnabled = true;
+			sendEventsContainer.alpha = 1;
 		}
 	
+		/**
+		 * For debug purpose, show the log in the log window
+		 */
 		private function onOperationCompleteEvent(event:OperationCompleteEvent):void {
 			
 			var textToAdd:String = (new Date()).toTimeString() + ": ";
@@ -372,27 +504,37 @@ package
 			logsTextArea.text = textToAdd + logsTextArea.text;
 		}
 		
-		private function onSendEvent(event:Event):void {
+		/**
+		 * Send the GUI events to the server
+		 */
+		private function onSendEvents(event:Event):void {
 			
-			var paramsDictionary:Dictionary = new Dictionary();
-			
-			if (eventParametersContainer.numChildren > 0) {
-				// There are event parameters to send
+			for (var eventIndex:int = 0; eventIndex < sendEventsContainer.numChildren; eventIndex++) {
+		
+				var eventContainer:LayoutGroup = sendEventsContainer.getChildAt(eventIndex) as LayoutGroup;
+				var eventNameTextInput:TextInput = eventContainer.getChildAt(3) as TextInput;
+				var eventParametersContainer:ScrollContainer = eventContainer.getChildAt(5) as ScrollContainer;
 				
-				for (var childrenIndex:int = 0; childrenIndex < eventParametersContainer.numChildren; childrenIndex++) {
-					var paramsContainer:LayoutGroup = eventParametersContainer.getChildAt(childrenIndex) as LayoutGroup;
+				var paramsDictionary:Dictionary = new Dictionary();
+				
+				if (eventParametersContainer.numChildren > 0) {
+					// There are event parameters to send
 					
-					// get the param name 
-					var paramNameTextInput:TextInput = paramsContainer.getChildAt(0) as TextInput;
-
-					// ge the param value
-					var paramValueTextInput:TextInput = paramsContainer.getChildAt(1) as TextInput;
-					
-					paramsDictionary[paramNameTextInput.text] = paramValueTextInput.text;
+					for (var childrenIndex:int = 0; childrenIndex < eventParametersContainer.numChildren; childrenIndex++) {
+						var paramsContainer:LayoutGroup = eventParametersContainer.getChildAt(childrenIndex) as LayoutGroup;
+						
+						// get the param name 
+						var paramNameTextInput:TextInput = paramsContainer.getChildAt(0) as TextInput;
+	
+						// ge the param value
+						var paramValueTextInput:TextInput = paramsContainer.getChildAt(1) as TextInput;
+						
+						paramsDictionary[paramNameTextInput.text] = paramValueTextInput.text;
+					}
 				}
+				
+				CoolaDataTracker.getInstance().trackEvent(eventNameTextInput.text, null, null, paramsDictionary, null, null);
 			}
-			
-			CoolaDataTracker.getInstance().trackEvent(eventNameTextInput.text, null, null, paramsDictionary, null, null);
 			
 			// Save all to shared object
 			testerConfiguration.saveConfiguration();
