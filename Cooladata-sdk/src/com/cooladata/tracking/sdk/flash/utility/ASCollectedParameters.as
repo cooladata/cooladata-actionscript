@@ -64,6 +64,12 @@ package com.cooladata.tracking.sdk.flash.utility
 			objectOfASParams["tracker_type"] = "Flash";
 			objectOfASParams["tracker_version"] = ConfigManager.getInstance().getVersion();
 			
+			// Add the event counter
+			objectOfASParams["events_counter"] = ConfigManager.getInstance().getEventsCounter();
+			
+			// Increase the event counting
+			ConfigManager.getInstance().increaseEventsCounter(1);
+			
 			return objectOfASParams;
 		}
 		

@@ -5,7 +5,6 @@ package com.cooladata.tracking.sdk.flash.network
 	import com.cooladata.tracking.sdk.flash.utility.Enums;
 	import com.cooladata.tracking.sdk.flash.utility.Utility;
 	
-	import flash.CoolaDataTracker;
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IEventDispatcher;
