@@ -69,6 +69,8 @@ package com.cooladata.tracking.sdk.flash
 			configManager.setTokenIsValid(true);
 			
 			configManager.initializeConfigeManager();
+			
+			configManager.resetEventsCounter();
 		}
 		
 		public function trackEvent(eventName:String, userId:String, sessionId:String , dictionary:Dictionary, eventId:Number, callBackFunction:Function):void {

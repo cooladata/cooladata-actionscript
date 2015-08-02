@@ -25,6 +25,8 @@ package com.cooladata.tracking.sdk.flash.utility
 		private var eventsOutageBackoffIntervalMillis:int = 15000;
 		private var eventsPublishIntervalMillis:int = 5000;
 		private var maxQueueSizeTriggerPercent:int = 85;
+		
+		private var eventsCounter:uint = 0;
 
 				
 		//eventIdDictionary store for every eventId an array of callbackfunction to send back the result from the server.
@@ -198,6 +200,20 @@ package com.cooladata.tracking.sdk.flash.utility
 			this.status = true;
 			QueueManager.getInstance().initializeQueuesAfterSetupSucceed();
 			CoolaDataTracker.getInstance().startEventsInterval();
+		}
+		
+		public function resetEventsCounter():void {
+			eventsCounter = 0;
+		}
+		
+		public function increaseEventsCounter(amount:uint):void {
+			eventsCounter += amount;
+			
+			trace("*** new event counter: " + eventsCounter);
+		}
+		
+		public function getEventsCounter():uint {
+			return eventsCounter;
 		}
 
 	}
