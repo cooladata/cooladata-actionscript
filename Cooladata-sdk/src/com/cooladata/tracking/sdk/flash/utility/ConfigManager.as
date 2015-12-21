@@ -12,7 +12,7 @@ package com.cooladata.tracking.sdk.flash.utility
 	 */
 	public class ConfigManager 
 	{
-		private var version:String = "v1.0.2";
+		private var version:String = "v1.0.3";
 		private var status:Boolean;
 		private var internalServiceEndPoint:String = "https://api.cooladata.com";
 		private var serviceEndPoint:String;
@@ -28,6 +28,7 @@ package com.cooladata.tracking.sdk.flash.utility
 		
 		private var eventsCounter:uint = 0;
 
+		private var totalEventsCount:uint = 0;
 				
 		//eventIdDictionary store for every eventId an array of callbackfunction to send back the result from the server.
 		public static var eventIdDictionary:Dictionary = new Dictionary();
@@ -206,14 +207,18 @@ package com.cooladata.tracking.sdk.flash.utility
 			eventsCounter = 0;
 		}
 		
-		public function increaseEventsCounter(amount:uint):void {
-			eventsCounter += amount;
+		public function increaseEventsCounter():void {
+			eventsCounter++;
 			
-			trace("*** new event counter: " + eventsCounter);
+			totalEventsCount += eventsCounter;
 		}
 		
 		public function getEventsCounter():uint {
 			return eventsCounter;
+		}
+		
+		public function geTtotalEventsCount():uint {
+			return totalEventsCount;
 		}
 
 	}
