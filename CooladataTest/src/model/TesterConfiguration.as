@@ -82,6 +82,8 @@ package model
 				trace("Error creating shared object" + error.toString());
 				return false;
 			}
+			
+			return false;
 		}
 	}
 }

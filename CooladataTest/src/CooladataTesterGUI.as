@@ -2,6 +2,7 @@ package
 {
 	import com.cooladata.tracking.sdk.flash.CoolaDataTracker;
 	import com.cooladata.tracking.sdk.flash.events.OperationCompleteEvent;
+	import com.cooladata.tracking.sdk.flash.utility.ConfigManager;
 	
 	import flash.utils.Dictionary;
 	
@@ -33,13 +34,16 @@ package
 		private var logsTextArea:TextArea;
 		private var setUpContainer:LayoutGroup;
 		private var sendEventsContainer:ScrollContainer;
+		private var eventsButtonsContainer:ScrollContainer;
 		private var addEventButton:Button;
 		private var horizontalLayout:HorizontalLayout;
 		private var verticalLayout:VerticalLayout;
 		private var sendEventsButton:Button;
+		private var sendXTimes:TextInput;
 		
 		public function CooladataTesterGUI()
 		{
+			
 			testerConfiguration = new TesterConfiguration
 			var theme:CustomMetalWorksTheme = new CustomMetalWorksTheme();
 			
@@ -237,14 +241,37 @@ package
 			
 			generalContainer.addChild(sendEventsContainer);
 			
+			var eventsButtonsContainerHerticalLayout:HorizontalLayout = new HorizontalLayout();
+			eventsButtonsContainerHerticalLayout.gap = 10;
+			
+			eventsButtonsContainer = new ScrollContainer();
+			eventsButtonsContainer.height = 50;
+			eventsButtonsContainer.width = 800;
+			eventsButtonsContainer.layout = eventsButtonsContainerHerticalLayout;
+			
+			generalContainer.addChild(eventsButtonsContainer);
+			
+			eventsButtonsContainer.isEnabled = false;
+			eventsButtonsContainer.alpha = 0.5;
+			
 			addEventButton = new Button();
 			addEventButton.label = "Add Event";
 			addEventButton.addEventListener(Event.TRIGGERED, onAddEvent);
-			generalContainer.addChild(addEventButton); 
+			eventsButtonsContainer.addChild(addEventButton); 
 			
 			sendEventsButton = new Button();
 			sendEventsButton.addEventListener(Event.TRIGGERED, onSendEvents);
-			generalContainer.addChild( sendEventsButton );
+			eventsButtonsContainer.addChild( sendEventsButton );
+			
+			sendXTimes = new TextInput();
+			sendXTimes.prompt = "Num of times to send";
+			sendXTimes.restrict = "0-9";
+			eventsButtonsContainer.addChild(sendXTimes);
+			
+			var traceCounterButton:Button = new Button();
+			traceCounterButton.label = "Trace counter";
+			traceCounterButton.addEventListener(Event.TRIGGERED, onTraceCounter);
+			eventsButtonsContainer.addChild(traceCounterButton); 
 			
 			// Add the first event
 			onAddEvent(null);
@@ -470,6 +497,9 @@ package
 			
 			sendEventsContainer.isEnabled = true;
 			sendEventsContainer.alpha = 1;
+			
+			eventsButtonsContainer.isEnabled = true;
+			eventsButtonsContainer.alpha = 1;
 		}
 	
 		/**
@@ -505,35 +535,52 @@ package
 		}
 		
 		/**
+		 * Add the events counter total sum to the log window
+		 */
+		private function onTraceCounter(event:Event):void {
+			logsTextArea.text = ("Total events count: " + ConfigManager.getInstance().geTtotalEventsCount() +  "\n") + logsTextArea.text;
+		}
+		
+		/**
 		 * Send the GUI events to the server
 		 */
 		private function onSendEvents(event:Event):void {
+
+			var numOfTimesToSend:uint = parseInt(sendXTimes.text);
 			
-			for (var eventIndex:int = 0; eventIndex < sendEventsContainer.numChildren; eventIndex++) {
-		
-				var eventContainer:LayoutGroup = sendEventsContainer.getChildAt(eventIndex) as LayoutGroup;
-				var eventNameTextInput:TextInput = eventContainer.getChildAt(3) as TextInput;
-				var eventParametersContainer:ScrollContainer = eventContainer.getChildAt(5) as ScrollContainer;
-				
-				var paramsDictionary:Dictionary = new Dictionary();
-				
-				if (eventParametersContainer.numChildren > 0) {
-					// There are event parameters to send
+			if (numOfTimesToSend == 0) {
+				numOfTimesToSend = 1;
+			}
+			
+			logsTextArea.text = ("Sending event " + numOfTimesToSend.toString() + " times\n") + logsTextArea.text;
+
+			for (var sendXTimeCounter:uint = 0; sendXTimeCounter < numOfTimesToSend; sendXTimeCounter++) {
+				for (var eventIndex:int = 0; eventIndex < sendEventsContainer.numChildren; eventIndex++) {
+			
+					var eventContainer:LayoutGroup = sendEventsContainer.getChildAt(eventIndex) as LayoutGroup;
+					var eventNameTextInput:TextInput = eventContainer.getChildAt(3) as TextInput;
+					var eventParametersContainer:ScrollContainer = eventContainer.getChildAt(5) as ScrollContainer;
 					
-					for (var childrenIndex:int = 0; childrenIndex < eventParametersContainer.numChildren; childrenIndex++) {
-						var paramsContainer:LayoutGroup = eventParametersContainer.getChildAt(childrenIndex) as LayoutGroup;
+					var paramsDictionary:Dictionary = new Dictionary();
+					
+					if (eventParametersContainer.numChildren > 0) {
+						// There are event parameters to send
 						
-						// get the param name 
-						var paramNameTextInput:TextInput = paramsContainer.getChildAt(0) as TextInput;
-	
-						// ge the param value
-						var paramValueTextInput:TextInput = paramsContainer.getChildAt(1) as TextInput;
-						
-						paramsDictionary[paramNameTextInput.text] = paramValueTextInput.text;
+						for (var childrenIndex:int = 0; childrenIndex < eventParametersContainer.numChildren; childrenIndex++) {
+							var paramsContainer:LayoutGroup = eventParametersContainer.getChildAt(childrenIndex) as LayoutGroup;
+							
+							// get the param name 
+							var paramNameTextInput:TextInput = paramsContainer.getChildAt(0) as TextInput;
+		
+							// ge the param value
+							var paramValueTextInput:TextInput = paramsContainer.getChildAt(1) as TextInput;
+							
+							paramsDictionary[paramNameTextInput.text] = paramValueTextInput.text;
+						}
 					}
+					
+					CoolaDataTracker.getInstance().trackEvent(eventNameTextInput.text, null, null, paramsDictionary, null, null);
 				}
-				
-				CoolaDataTracker.getInstance().trackEvent(eventNameTextInput.text, null, null, paramsDictionary, null, null);
 			}
 			
 			// Save all to shared object
