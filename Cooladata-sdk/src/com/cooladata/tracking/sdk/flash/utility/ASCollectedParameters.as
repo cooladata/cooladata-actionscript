@@ -1,7 +1,6 @@
 package com.cooladata.tracking.sdk.flash.utility 
 {
 	import flash.system.Capabilities;
-	import flash.external.ExternalInterface;
 	import flash.utils.Dictionary;
 	
 	/**
@@ -23,17 +22,7 @@ package com.cooladata.tracking.sdk.flash.utility
 			
 			session_os = Capabilities.os;
 			session_os_version = Capabilities.version;
-			try{
-				session_browser = ExternalInterface.call("window.navigator.appName.toString");
-				session_browser_version = ExternalInterface.call("window.navigator.appVersion.toString");
-				session_dua = ExternalInterface.call("window.navigator.userAgent.toString");
-			}
-			catch (error:Error) {
-				//not in a browser
-				session_browser = "";
-				session_browser_version = "";
-				session_dua = "";
-			}
+		
 			session_screen_scale = "{" + Capabilities.screenResolutionX + "," + Capabilities.screenResolutionY + "}";
 			time_in_app = Math.floor((new Date().getTime() - ConfigManager.getInstance().getStartingTime()) / 1000);
 			
@@ -46,21 +35,13 @@ package com.cooladata.tracking.sdk.flash.utility
 			if (session_os_version != "")
 				objectOfASParams["session_os_version"] = session_os_version;
 			
-			if (session_browser != "")
-				objectOfASParams["session_browser"] = session_browser;
-			
-			if (session_browser_version != "")
-				objectOfASParams["session_browser_version"] = session_browser_version;
-			
-			if (session_dua != "")
-				objectOfASParams.session_dua = session_dua;
-			
 			if (session_screen_scale != "")
 				objectOfASParams["session_screen_scale"] = session_screen_scale;
 			
 			objectOfASParams["time_in_app"] = time_in_app;
 			
-			objectOfASParams.event_timestamp_epoch = new Date().getTime();
+			objectOfASParams["event_timestamp_epoch"] = (new Date()).time;
+			objectOfASParams["event_timezone_offset"] = -(new Date()).timezoneOffset / 60; // Timezone diff in hours
 			objectOfASParams["tracker_type"] = "Flash";
 			objectOfASParams["tracker_version"] = ConfigManager.getInstance().getVersion();
 			
@@ -68,7 +49,7 @@ package com.cooladata.tracking.sdk.flash.utility
 			objectOfASParams["events_counter"] = ConfigManager.getInstance().getEventsCounter();
 			
 			// Increase the event counting
-			ConfigManager.getInstance().increaseEventsCounter(1);
+			ConfigManager.getInstance().increaseEventsCounter();
 			
 			return objectOfASParams;
 		}
