@@ -55,6 +55,7 @@ package
 			CoolaDataTracker.getInstance().addEventListener(OperationCompleteEvent.EVENT__EVENTS_SENT_ERROR, onOperationCompleteEvent);
 			CoolaDataTracker.getInstance().addEventListener(OperationCompleteEvent.EVENT__EVENTS_SENT_SUCCESS, onOperationCompleteEvent);
 			CoolaDataTracker.getInstance().addEventListener(OperationCompleteEvent.EVENT__SECUTIRY_ERROR, onOperationCompleteEvent);
+			CoolaDataTracker.getInstance().addEventListener(OperationCompleteEvent.EVENT__GOT_CALIBRATION_TIME, onOperationCompleteEvent);
 		}
 		
 		protected function addedToStageHandler( event:Event ):void
@@ -528,6 +529,13 @@ package
 				
 				case OperationCompleteEvent.EVENT__SECUTIRY_ERROR:
 					textToAdd += "Security error, do you have a crossdomain.xml access?" + "\n";	
+					break;
+				
+				case OperationCompleteEvent.EVENT__GOT_CALIBRATION_TIME:
+					var date:Date = new Date();
+					date.time = event.value;
+					
+					textToAdd += "Got calibration time (" + event.value + ") : " + date.toUTCString();	
 					break;
 			}
 			

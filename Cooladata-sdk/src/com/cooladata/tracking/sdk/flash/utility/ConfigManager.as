@@ -12,7 +12,7 @@ package com.cooladata.tracking.sdk.flash.utility
 	 */
 	public class ConfigManager 
 	{
-		private var version:String = "v1.0.3";
+		private var version:String = "v1.0.4";
 		private var status:Boolean;
 		private var internalServiceEndPoint:String = "https://api.cooladata.com";
 		private var serviceEndPoint:String;
@@ -41,6 +41,12 @@ package com.cooladata.tracking.sdk.flash.utility
 		private var apiToken:String = "";
 		private var userID:String = "";
 		private var sessionID:String = "";
+		
+		/**
+		 * The server time we got during setup.
+		 * If this value is 0, it means that we did not get this number from the server
+		**/
+		private var calibrationTimeMS:Number = 0;
 		
 		private static var _instance:ConfigManager = null;
 		private static var allowInstantiation:Boolean;
@@ -120,6 +126,11 @@ package com.cooladata.tracking.sdk.flash.utility
 		}
 		
 		public function setUserServiceEndPoint(userServiceEndPoint:String):void {
+			// Take off extra slash if needed
+			if (userServiceEndPoint.charAt(userServiceEndPoint.length - 1) == '/') {
+				userServiceEndPoint = userServiceEndPoint.substr(0, userServiceEndPoint.length - 1);
+			}
+			
 			this.userServiceEndPoint = userServiceEndPoint;
 		}
 		
@@ -141,6 +152,14 @@ package com.cooladata.tracking.sdk.flash.utility
 		
 		public function setSessionID(sessionID:String):void {
 			this.sessionID = sessionID;
+		}
+		
+		public function getCalibrationTimeMS():Number {
+			return this.calibrationTimeMS;
+		}
+		
+		public function setCalibrationTimeMS(value:Number):void {
+			this.calibrationTimeMS = value;
 		}
 		
 		public function getTokenIsValid():Boolean {

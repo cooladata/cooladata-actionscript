@@ -1,6 +1,7 @@
 package com.cooladata.tracking.sdk.flash 
 {
 	import com.cooladata.tracking.sdk.flash.events.OperationCompleteEvent;
+	import com.cooladata.tracking.sdk.flash.network.GetConfigRequestManager;
 	import com.cooladata.tracking.sdk.flash.network.HttpMultiRequestManager;
 	import com.cooladata.tracking.sdk.flash.utility.ConfigManager;
 	import com.cooladata.tracking.sdk.flash.utility.Enums;
@@ -74,6 +75,9 @@ package com.cooladata.tracking.sdk.flash
 			configManager.initializeConfigeManager();
 			
 			configManager.resetEventsCounter();
+			
+			// Get the calibration time from the server
+			(new GetConfigRequestManager(userServiceEndPoint ,apiToken)).sendRequest();
 		}
 		
 		private function createGUID(value:Array = null ):String {
@@ -114,7 +118,7 @@ package com.cooladata.tracking.sdk.flash
 				else if ((!isNaN(eventId) && eventId != 0) && callBackFunction == null) {
 					throw new Error(Enums.ERROR_MISSING_CALL_BACK_FUNCTION);
 				}
-				
+								
 				var trackEvent:TrackEvent = new TrackEvent(eventName, userId, sessionId, dictionary, eventId, callBackFunction);
 				QueueManager.getInstance().storeTrackEvent(trackEvent.getTrackEventObject());
 			}

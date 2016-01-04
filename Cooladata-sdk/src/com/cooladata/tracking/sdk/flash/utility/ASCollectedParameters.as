@@ -18,13 +18,13 @@ package com.cooladata.tracking.sdk.flash.utility
 			var session_browser_version:String = "";
 			var session_dua:String = "";
 			var session_screen_scale:String = "";
-			var time_in_app:Number = 0;
+			var time_in_app_ms:Number = 0;
 			
 			session_os = Capabilities.os;
 			session_os_version = Capabilities.version;
 		
 			session_screen_scale = "{" + Capabilities.screenResolutionX + "," + Capabilities.screenResolutionY + "}";
-			time_in_app = Math.floor((new Date().getTime() - ConfigManager.getInstance().getStartingTime()) / 1000);
+			time_in_app_ms = (new Date().getTime() - ConfigManager.getInstance().getStartingTime());
 			
 			//preper object of params to send:
 			var objectOfASParams:Dictionary = new Dictionary();
@@ -38,9 +38,17 @@ package com.cooladata.tracking.sdk.flash.utility
 			if (session_screen_scale != "")
 				objectOfASParams["session_screen_scale"] = session_screen_scale;
 			
-			objectOfASParams["time_in_app"] = time_in_app;
+			objectOfASParams["time_in_app"] = time_in_app_ms;
 			
-			objectOfASParams["event_timestamp_epoch"] = (new Date()).time;
+			if (ConfigManager.getInstance().getCalibrationTimeMS() == 0) {
+				// We don't have the calibration time, use local time	
+				objectOfASParams["event_timestamp_epoch"] = (new Date()).time;
+			}
+			else {
+				// Use server time
+				objectOfASParams["event_timestamp_epoch"] = ConfigManager.getInstance().getCalibrationTimeMS() + time_in_app_ms;
+			}
+						
 			objectOfASParams["event_timezone_offset"] = -(new Date()).timezoneOffset / 60; // Timezone diff in hours
 			objectOfASParams["tracker_type"] = "Flash";
 			objectOfASParams["tracker_version"] = ConfigManager.getInstance().getVersion();

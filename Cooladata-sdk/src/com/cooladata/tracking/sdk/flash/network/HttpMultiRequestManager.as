@@ -45,7 +45,7 @@ package com.cooladata.tracking.sdk.flash.network
 			var urlRequestMaker:UrlRequestMaker = new UrlRequestMaker(Utility.getArrayOfTrackEventsAsMultiJson(this.arrayOfTrackEventsToSend), "multi");
 			var request:URLRequest = urlRequestMaker.getRequest();
 			
-			CoolaDataTracker.getInstance().sendOperationCompleteEvent(new OperationCompleteEvent(OperationCompleteEvent.EVENT__TRYING_TO_SEND_EVENTS, arrayOfTrackEventsToSend.length));
+			CoolaDataTracker.getInstance().sendOperationCompleteEvent(new OperationCompleteEvent(OperationCompleteEvent.EVENT__TRYING_TO_SEND_EVENTS, arrayOfTrackEventsToSend.length as Number));
 			
 			loader = new URLLoader();
 			configureListenersMultiRequest(loader);
